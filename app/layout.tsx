@@ -12,9 +12,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+//metadata browser title
 export const metadata: Metadata = {
-  title: "Next.js + Supabase Starter",
-  description: "A Next.js starter with Supabase authentication",
+  title: "almostdaily",
+  description: "hobonichi-style online journaling",
 };
 
 export default function RootLayout({
