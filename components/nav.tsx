@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/(protected)/actions";
+import { ModeToggle } from "./ModeToggle";
 
 const links = [
-  { href: "/dashboard", label: "dashboard" },
-  { href: "/journal", label: "journal" },
+  { href: "/", label: "home" },
   { href: "/journal/whiteboard", label: "whiteboard" },
 ];
 
@@ -14,13 +14,12 @@ export default function Nav() {
   const pathname = usePathname();
 
   return (
-    <nav className="border-b bg-white px-6 py-4">
-      <div className="mx-auto flex max-w-5xl items-center justify-between">
+    <nav className="border-b bg-background px-6 py-4">
+      <div className="mx-auto flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link
-            className="font-bold text-gray-900"
-            key={"/dashboard"}
-            href={"/dashboard"}
+            className="font-bold text-foreground"
+            href={"/"}
           >
             almostdaily
           </Link>
@@ -31,8 +30,8 @@ export default function Nav() {
                 href={href}
                 className={`text-sm ${
                   pathname === href
-                    ? "font-medium text-gray-900"
-                    : "text-gray-500 hover:text-gray-700"
+                    ? "font-medium text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {label}
@@ -40,14 +39,18 @@ export default function Nav() {
             ))}
           </div>
         </div>
-        <form action={signOut}>
-          <button
-            type="submit"
-            className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            sign out
-          </button>
-        </form>
+
+        <div className="flex flex-row items-center gap-4">
+          <ModeToggle></ModeToggle>
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
+            >
+              sign out
+            </button>
+          </form>
+        </div>
       </div>
     </nav>
   );

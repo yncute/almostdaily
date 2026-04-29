@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useToolboxConfig } from "@/hooks/useToolboxConfig";
 import { Toolbar } from "./Toolbar";
 import { Toolbox } from "./Toolbox";
+import { createClient } from "@/lib/supabase/client";
 
 // ─── Settings Icon ────────────────────────────────────────────────────────────
 
@@ -36,9 +37,32 @@ function SettingsIcon() {
  * extension set changes — this is required because Tiptap extensions are
  * baked in at init time.
  */
-export function JournalEditor() {
+interface JournalEditorProps {
+  initialContent?: object | null;
+  date?: string;
+}
+
+export function JournalEditor({ initialContent, date }: JournalEditorProps) {
   const toolboxConfig = useToolboxConfig();
   const [toolboxOpen, setToolboxOpen] = useState(false);
+  const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const supabase = createClient();
+
+  const save = useCallback(
+    (content: object) => {
+      if (!date) return;
+      if (saveTimeout.current) clearTimeout(saveTimeout.current);
+      saveTimeout.current = setTimeout(async () => {
+        await supabase
+          .from("journal_entries")
+          .upsert(
+            { date, content, updated_at: new Date().toISOString() },
+            { onConflict: "user_id,date" },
+          );
+      }, 1000);
+    },
+    [date, supabase],
+  );
 
   const editorKey = Array.from(toolboxConfig.enabledKeys).sort().join(",");
 
@@ -59,6 +83,8 @@ export function JournalEditor() {
   const editor = useEditor(
     {
       immediatelyRender: false,
+      content: initialContent ?? undefined,
+      onUpdate: ({ editor }) => save(editor.getJSON()),
       extensions: [
         // StarterKit provides Document, Paragraph, Text, History, etc.
         // Disable built-ins that we manage ourselves via the registry.
@@ -80,7 +106,7 @@ export function JournalEditor() {
       editorProps: {
         attributes: {
           class:
-            "prose prose-sm sm:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[200px]",
+            "prose prose-sm prose-base dark:prose-invert max-w-none focus:outline-none min-h-[200px]",
         },
       },
     },
@@ -88,7 +114,7 @@ export function JournalEditor() {
   );
 
   return (
-    <div className="relative flex flex-col border border-border rounded-lg overflow-hidden bg-background">
+    <div className="relative flex flex-col h-full rounded-lg overflow-hidden bg-background">
       {/* ── Topbar ── */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-muted/40">
         {editor && (
