@@ -7,26 +7,7 @@ import { useToolboxConfig } from "@/hooks/useToolboxConfig";
 import { Toolbar } from "./Toolbar";
 import { Toolbox } from "./Toolbox";
 import { createClient } from "@/lib/supabase/client";
-
-// ─── Settings Icon ────────────────────────────────────────────────────────────
-
-function SettingsIcon() {
-  return (
-    <svg
-      width={16}
-      height={16}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
+import { ChevronUp, ChevronDown, Settings2 } from "lucide-react";
 
 // ─── JournalEditor ────────────────────────────────────────────────────────────
 
@@ -112,19 +93,19 @@ export function JournalEditor({
   return (
     <div className="relative flex flex-col h-full rounded-lg overflow-hidden bg-background">
       {/* ── Topbar ── */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-muted/40">
-        {editor && toolbarOpen && (
-          <>
-            <Toolbar
-              editor={editor}
-              enabledKeys={toolboxConfig.enabledKeys}
-              className="flex-1"
-            />
-            <button
-              title="Customize toolbar"
-              aria-label="Customize toolbar"
-              onClick={() => setToolboxOpen((o) => !o)}
-              className={`
+
+      {editor && toolbarOpen ? (
+        <div className="flex items-center gap-2 p-2 border-b border-border bg-muted/40">
+          <Toolbar
+            editor={editor}
+            enabledKeys={toolboxConfig.enabledKeys}
+            className="flex-1"
+          />
+          <button
+            title="Customize toolbar"
+            aria-label="Customize toolbar"
+            onClick={() => setToolboxOpen((o) => !o)}
+            className={`
             p-1.5 rounded transition-colors ml-auto shrink-0
             ${
               toolboxOpen
@@ -132,28 +113,38 @@ export function JournalEditor({
                 : "text-muted-foreground hover:text-foreground hover:bg-muted"
             }
           `}
-            >
-              <SettingsIcon />
-            </button>
-          </>
-        )}
-
+          >
+            <Settings2></Settings2>
+          </button>
+          <button
+            title="Enable and disable toolbar"
+            aria-label="Enable and disable toolbar"
+            onClick={() => setToolbarOpen((o) => !o)}
+            className={`
+            p-1.5 rounded transition-colors ml-auto shrink-0
+            ${
+              toolbarOpen
+                ? "text-muted-foreground hover:text-foreground hover:bg-muted"
+                : "bg-primary text-primary-foreground"
+            }
+          `}
+          >
+            <ChevronUp />
+          </button>
+        </div>
+      ) : (
         <button
           title="Enable and disable toolbar"
           aria-label="Enable and disable toolbar"
           onClick={() => setToolbarOpen((o) => !o)}
           className={`
-            p-1.5 rounded transition-colors ml-auto shrink-0
-            ${
-              toolbarOpen
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted"
-            }
+           absolute z-1 right-0 top-0 m-2 p-1.5 rounded transition-colors ml-auto shrink-0
+            ${"text-muted-foreground hover:text-foreground hover:bg-muted"}
           `}
         >
-          open/close
+          <ChevronDown />
         </button>
-      </div>
+      )}
 
       <div className="flex flex-1">
         {/* ── Editor ── */}
@@ -162,7 +153,7 @@ export function JournalEditor({
         </div>
 
         {/* ── Toolbox drawer ── */}
-        {toolboxOpen && (
+        {toolboxOpen && toolbarOpen && (
           <div className="w-64 border-l border-border px-4 py-4 overflow-y-auto shrink-0 bg-background">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold">Customize toolbar</h2>
