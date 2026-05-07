@@ -23,6 +23,10 @@ export default async function JournalDayPage({ params }: Props) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) notFound();
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) notFound();
   const { data: entry } = await supabase
     .from("journal_entries")
     .select("content")
@@ -35,7 +39,11 @@ export default async function JournalDayPage({ params }: Props) {
         <p className="text-sm text-muted-foreground">{formatDate(date)}</p>
       </div>
       <div className="flex-1 overflow-hidden">
-        <JournalEditor initialContent={entry?.content ?? null} date={date} />
+        <JournalEditor
+          initialContent={entry?.content ?? null}
+          date={date}
+          userId={user.id}
+        />
       </div>
     </div>
   );

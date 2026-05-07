@@ -1,14 +1,14 @@
-import { createClient } from "@/lib/supabase/server";
-import { JournalEditor } from "@/components/editor/JournalEditor";
+// import { createClient } from "@/lib/supabase/server";
+// import { JournalEditor } from "@/components/editor/JournalEditor";
 
-// supabase to get user data
+// // supabase to get user data
 
-export default async function JournalPage() {
-  const supabase = await createClient();
+// export default async function JournalPage() {
+//   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+//   const {
+//     data: { user },
+//   } = await supabase.auth.getUser();
 
-  return <JournalEditor></JournalEditor>;
-}
+//   return <JournalEditor></JournalEditor>;
+// }

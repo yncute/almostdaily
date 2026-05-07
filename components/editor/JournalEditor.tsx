@@ -40,45 +40,41 @@ function SettingsIcon() {
 interface JournalEditorProps {
   initialContent?: object | null;
   date?: string;
+  userId?: string;
 }
 
-export function JournalEditor({ initialContent, date }: JournalEditorProps) {
+export function JournalEditor({
+  initialContent,
+  date,
+  userId,
+}: JournalEditorProps) {
   const toolboxConfig = useToolboxConfig();
   const [toolboxOpen, setToolboxOpen] = useState(false);
+  const [toolbarOpen, setToolbarOpen] = useState(true);
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const supabase = createClient();
 
   const save = useCallback(
     (content: object) => {
-      if (!date) return;
+      if (!date || !userId) return;
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
       saveTimeout.current = setTimeout(async () => {
-        await supabase
-          .from("journal_entries")
-          .upsert(
-            { date, content, updated_at: new Date().toISOString() },
-            { onConflict: "user_id,date" },
-          );
+        const { error } = await supabase.from("journal_entries").upsert(
+          {
+            user_id: userId,
+            date,
+            content,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id,date" },
+        );
+        if (error) console.error("Save failed:", error);
       }, 1000);
     },
-    [date, supabase],
+    [date, userId, supabase],
   );
 
   const editorKey = Array.from(toolboxConfig.enabledKeys).sort().join(",");
-
-  //   // Track a key we bump whenever enabled extensions change, forcing editor remount
-  //   const [editorKey, setEditorKey] = useState(0);
-  //   const prevKeysRef = useRef(toolboxConfig.enabledKeys);
-
-  //   useEffect(() => {
-  //     // Only remount if the set actually changed
-  //     const prev = prevKeysRef.current;
-  //     const next = toolboxConfig.enabledKeys;
-  //     if (prev !== next) {
-  //       prevKeysRef.current = next;
-  //       setEditorKey((k) => k + 1);
-  //     }
-  //   }, [toolboxConfig.enabledKeys]);
 
   const editor = useEditor(
     {
@@ -117,18 +113,18 @@ export function JournalEditor({ initialContent, date }: JournalEditorProps) {
     <div className="relative flex flex-col h-full rounded-lg overflow-hidden bg-background">
       {/* ── Topbar ── */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-muted/40">
-        {editor && (
-          <Toolbar
-            editor={editor}
-            enabledKeys={toolboxConfig.enabledKeys}
-            className="flex-1"
-          />
-        )}
-        <button
-          title="Customize toolbar"
-          aria-label="Customize toolbar"
-          onClick={() => setToolboxOpen((o) => !o)}
-          className={`
+        {editor && toolbarOpen && (
+          <>
+            <Toolbar
+              editor={editor}
+              enabledKeys={toolboxConfig.enabledKeys}
+              className="flex-1"
+            />
+            <button
+              title="Customize toolbar"
+              aria-label="Customize toolbar"
+              onClick={() => setToolboxOpen((o) => !o)}
+              className={`
             p-1.5 rounded transition-colors ml-auto shrink-0
             ${
               toolboxOpen
@@ -136,8 +132,26 @@ export function JournalEditor({ initialContent, date }: JournalEditorProps) {
                 : "text-muted-foreground hover:text-foreground hover:bg-muted"
             }
           `}
+            >
+              <SettingsIcon />
+            </button>
+          </>
+        )}
+
+        <button
+          title="Enable and disable toolbar"
+          aria-label="Enable and disable toolbar"
+          onClick={() => setToolbarOpen((o) => !o)}
+          className={`
+            p-1.5 rounded transition-colors ml-auto shrink-0
+            ${
+              toolbarOpen
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            }
+          `}
         >
-          <SettingsIcon />
+          open/close
         </button>
       </div>
 
