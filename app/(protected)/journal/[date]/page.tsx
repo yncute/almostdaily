@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { JournalEditor } from "@/components/editor/JournalEditor";
 import { createClient } from "@/lib/supabase/server";
-
+import { MoodTracker } from "@/components/MoodTracker";
 interface Props {
   params: Promise<{ date: string }>;
 }
@@ -27,9 +27,10 @@ export default async function JournalDayPage({ params }: Props) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) notFound();
+
   const { data: entry } = await supabase
     .from("journal_entries")
-    .select("content")
+    .select("content, mood")
     .eq("date", date)
     .maybeSingle();
 
@@ -38,7 +39,13 @@ export default async function JournalDayPage({ params }: Props) {
       <div className="border-b border-border px-6 py-4">
         <p className="text-sm text-muted-foreground">{formatDate(date)}</p>
       </div>
+
       <div className="flex-1 overflow-hidden">
+        <MoodTracker
+          date={date}
+          userId={user.id}
+          initialMood={entry?.mood ?? null}
+        ></MoodTracker>
         <JournalEditor
           initialContent={entry?.content ?? null}
           date={date}

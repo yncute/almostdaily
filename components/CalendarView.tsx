@@ -3,11 +3,22 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "./ui/button";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 function toDateString(year: number, month: number, day: number) {
@@ -22,13 +33,17 @@ export function CalendarView() {
   const [month, setMonth] = useState(today.getMonth());
 
   function prevMonth() {
-    if (month === 0) { setMonth(11); setYear((y) => y - 1); }
-    else setMonth((m) => m - 1);
+    if (month === 0) {
+      setMonth(11);
+      setYear((y) => y - 1);
+    } else setMonth((m) => m - 1);
   }
 
   function nextMonth() {
-    if (month === 11) { setMonth(0); setYear((y) => y + 1); }
-    else setMonth((m) => m + 1);
+    if (month === 11) {
+      setMonth(0);
+      setYear((y) => y + 1);
+    } else setMonth((m) => m + 1);
   }
 
   const firstDay = new Date(year, month, 1).getDay();
@@ -75,7 +90,10 @@ export function CalendarView() {
       {/* Day labels */}
       <div className="mb-1 grid grid-cols-7 text-center">
         {DAYS.map((d) => (
-          <div key={d} className="py-2 text-xs font-medium text-muted-foreground">
+          <div
+            key={d}
+            className="py-2 text-xs font-medium text-muted-foreground"
+          >
             {d}
           </div>
         ))}
@@ -90,20 +108,23 @@ export function CalendarView() {
           const today_ = isToday(day);
 
           return (
-            <button
+            <Button
               key={i}
               onClick={() => router.push(`/journal/${dateStr}`)}
-              className={`
-                aspect-square w-full rounded-lg text-sm font-medium transition-colors
-                hover:bg-accent hover:text-accent-foreground
-                ${today_
-                  ? "bg-primary text-primary-foreground"
-                  : "text-foreground"
-                }
-              `}
+              // className={`
+              //   aspect-square w-full rounded-lg text-sm font-medium transition-colors
+              //   hover:bg-accent hover:text-accent-foreground
+              //   ${
+              //     today_
+              //       ? "bg-primary text-primary-foreground"
+              //       : "text-foreground"
+              //   }
+              // `}
+              className={"aspect-square w-full h-full rounded-lg text-sm"}
+              variant={`${today_ ? "outline" : "ghost"}`}
             >
               {day}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -112,7 +133,10 @@ export function CalendarView() {
       {!(month === today.getMonth() && year === today.getFullYear()) && (
         <div className="mt-6 text-center">
           <button
-            onClick={() => { setMonth(today.getMonth()); setYear(today.getFullYear()); }}
+            onClick={() => {
+              setMonth(today.getMonth());
+              setYear(today.getFullYear());
+            }}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Back to today
